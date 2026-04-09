@@ -1,0 +1,284 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vacation Picker</title>
+<style>
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(160deg, #fff8ef, #ffe3ef);
+    color: #2f2140;
+    padding: 20px;
+  }
+
+  .app {
+    width: 100%;
+    max-width: 560px;
+    text-align: center;
+    padding: 24px;
+    background: rgba(255,255,255,0.82);
+    border-radius: 28px;
+  }
+
+  h1 {
+    margin: 0 0 8px;
+    font-size: clamp(2rem, 6vw, 3.2rem);
+  }
+
+  p {
+    margin: 0 0 24px;
+    font-size: 1.1rem;
+    color: #5d4a72;
+  }
+
+  .wheel-stage {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin-bottom: 22px;
+  }
+
+  .wheel-wrap {
+    position: relative;
+    width: min(92vw, 420px);
+    aspect-ratio: 1 / 1;
+  }
+
+  .pointer {
+    position: absolute;
+    top: -6px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 18px solid transparent;
+    border-right: 18px solid transparent;
+    border-top: 34px solid #ff4b78;
+    z-index: 5;
+  }
+
+  .wheel {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border: 12px solid white;
+    background: conic-gradient(
+      from -30deg,
+      #ffd166 0deg 60deg,
+      #7fd3ff 60deg 120deg,
+      #b7f28f 120deg 180deg,
+      #ff9bc2 180deg 240deg,
+      #d1d5db 240deg 300deg,
+      #c7a7ff 300deg 360deg
+    );
+    position: relative;
+    overflow: hidden;
+    transition: transform 5s ease-out;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.12);
+  }
+
+  .wheel::after {
+    content: "";
+    position: absolute;
+    inset: 50%;
+    transform: translate(-50%, -50%);
+    width: 64px;
+    height: 64px;
+    background: #f4f4f4;
+    border: 10px solid #eadcf8;
+    border-radius: 50%;
+    z-index: 3;
+  }
+
+  .label {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 136px;
+    text-align: center;
+    font-weight: 800;
+    font-size: clamp(0.9rem, 2.7vw, 1rem);
+    line-height: 1.05;
+    color: #2d2342;
+    transform-origin: 50% 50%;
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  .label span {
+    display: inline-block;
+    max-width: 126px;
+    word-break: break-word;
+  }
+
+  /* Each label is rotated to the center of its slice, then moved outward.
+     The second rotate keeps text upright while staying aligned to the slice. */
+  .l1 { transform: translate(-50%, -50%) rotate(30deg) translateY(-145px) rotate(-30deg); }
+  .l2 { transform: translate(-50%, -50%) rotate(90deg) translateY(-145px) rotate(-90deg); }
+  .l3 { transform: translate(-50%, -50%) rotate(150deg) translateY(-145px) rotate(-150deg); }
+  .l4 { transform: translate(-50%, -50%) rotate(210deg) translateY(-145px) rotate(-210deg); }
+  .l5 { transform: translate(-50%, -50%) rotate(270deg) translateY(-145px) rotate(-270deg); }
+  .l6 { transform: translate(-50%, -50%) rotate(330deg) translateY(-145px) rotate(-330deg); }
+
+  .buttons {
+    display: flex;
+    justify-content: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+  }
+
+  button {
+    padding: 14px 24px;
+    border: none;
+    border-radius: 999px;
+    margin: 0;
+    font-weight: bold;
+    font-size: 1rem;
+    color: white;
+    cursor: pointer;
+  }
+
+  .spin {
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+  }
+
+  .reset {
+    background: linear-gradient(135deg, #6366f1, #60a5fa);
+  }
+
+  .result {
+    margin-top: 22px;
+    padding: 20px;
+    border: 2px dashed #dbc9ef;
+    border-radius: 22px;
+    background: rgba(255,255,255,0.72);
+    min-height: 112px;
+    font-size: 1rem;
+    line-height: 1.55;
+  }
+
+  .result strong {
+    display: block;
+    font-size: 1.15rem;
+    margin-bottom: 8px;
+  }
+
+  .again {
+    margin-top: 12px;
+    font-weight: 700;
+    color: #6d5a84;
+  }
+
+  @media (max-width: 480px) {
+    .app { padding: 18px; }
+    .wheel-wrap { width: min(94vw, 360px); }
+    .label { width: 112px; font-size: 0.82rem; }
+    .label span { max-width: 102px; }
+    .l1 { transform: translate(-50%, -50%) rotate(30deg) translateY(-124px) rotate(-30deg); }
+    .l2 { transform: translate(-50%, -50%) rotate(90deg) translateY(-124px) rotate(-90deg); }
+    .l3 { transform: translate(-50%, -50%) rotate(150deg) translateY(-124px) rotate(-150deg); }
+    .l4 { transform: translate(-50%, -50%) rotate(210deg) translateY(-124px) rotate(-210deg); }
+    .l5 { transform: translate(-50%, -50%) rotate(270deg) translateY(-124px) rotate(-270deg); }
+    .l6 { transform: translate(-50%, -50%) rotate(330deg) translateY(-124px) rotate(-330deg); }
+  }
+</style>
+</head>
+<body>
+  <div class="app">
+    <h1>Vacation Picker</h1>
+    <p>Spin the wheel to pick a vacation at random.</p>
+
+    <div class="wheel-stage">
+      <div class="wheel-wrap">
+        <div class="pointer"></div>
+        <div class="wheel" id="wheel">
+          <div class="label l1"><span>Beach</span></div>
+          <div class="label l2"><span>Ski Trip</span></div>
+          <div class="label l3"><span>Amusement Park</span></div>
+          <div class="label l4"><span>All-Inclusive Resort</span></div>
+          <div class="label l5"><span>Other</span></div>
+          <div class="label l6"><span>Arkansas</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="buttons">
+      <button class="spin" onclick="spin()">Spin the Wheel</button>
+      <button class="reset" onclick="resetWheel()">Reset</button>
+    </div>
+
+    <div class="result" id="result">Ready to decide? Give the wheel a spin.</div>
+  </div>
+
+<script>
+const options = [
+  {
+    label: "Beach",
+    msg: "You should go to the beach with the A-Halls! Con: Wayne stays inside."
+  },
+  {
+    label: "Ski Trip",
+    msg: "Freeze your asses off and roll down a hill with the A-Halls. Con: Lindsay stays inside."
+  },
+  {
+    label: "Amusement Park",
+    msg: "Ride sweet rides, eat all the foods, and walk your asses off with the A-Halls!"
+  },
+  {
+    label: "All-Inclusive Resort",
+    msg: "Look into an easy vacation at a kid-friendly all-inclusive resort with the A-Halls and hope to not get kidnapped. Bonus: Watch the A-Hall kids in exchange for a night of them watching yours!"
+  },
+  {
+    label: "Other",
+    msg: "Find a city to explore that’s not too hot, or not too cold, but feels just right. Go with the A-Halls, of course, to maximize your experience."
+  },
+  {
+    label: "Arkansas",
+    msg: "Road trip to NWA and enjoy the heat with the A-Halls. Bonus: you may get to leave with a free diamond! Con: Wayno stays inside if it’s hot and not in a shaded pool."
+  }
+];
+
+let rotation = 0;
+let spinning = false;
+
+function spin() {
+  if (spinning) return;
+  spinning = true;
+
+  const pick = Math.floor(Math.random() * 6);
+  const spins = Math.floor(Math.random() * 8) + 3;
+  const offset = Math.floor(Math.random() * 31) - 15;
+  const centerAngle = pick * 60 + 30;
+  rotation += spins * 360 + (360 - centerAngle) + offset;
+
+  document.getElementById("wheel").style.transform = "rotate(" + rotation + "deg)";
+  document.getElementById("result").innerHTML = "Spinning... <div class='again'>Where are the Johnsons going?</div>";
+
+  setTimeout(() => {
+    document.getElementById("result").innerHTML =
+      "<strong>" + options[pick].label + "</strong>" +
+      options[pick].msg +
+      "<div class='again'>Want to spin again? Tap Reset, then spin again.</div>";
+    spinning = false;
+  }, 5000);
+}
+
+function resetWheel() {
+  if (spinning) return;
+  rotation = 0;
+  document.getElementById("wheel").style.transform = "rotate(0deg)";
+  document.getElementById("result").innerHTML = "Ready to decide? Give the wheel a spin.";
+}
+</script>
+</body>
+</html>
